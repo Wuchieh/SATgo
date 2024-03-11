@@ -1,5 +1,10 @@
 package main
 
+import (
+	"math/rand"
+	"sync"
+)
+
 /*
 題目說明:
 
@@ -30,5 +35,72 @@ package main
  7. 本題目沒有提供標準輸入或輸出，請自行揣摩，沒有一定的寫法。
  8. 只要程式沒有 error，都歡迎寄回。
 */
+
+const (
+	BeefCount    = 10
+	PorkCount    = 7
+	ChickenCount = 8
+)
+
 func main() {
+	workerName := []string{"A", "B", "C", "D", "E"}
+
+	var workers []*Worker
+	for _, s := range workerName {
+		workers = append(workers, NewWorker(s))
+	}
+
+	meatChan := make(chan *Meat, BeefCount+PorkCount+ChickenCount)
+	initMeatsChan(meatChan)
+
+	// 啟動工人 goroutine
+	var wg sync.WaitGroup
+	for _, worker := range workers {
+		wg.Add(1)
+		go func(w *Worker) {
+			defer wg.Done()
+			for meat := range meatChan {
+				w.Work(*meat)
+			}
+		}(worker)
+	}
+
+	// 關閉 meatChan
+	close(meatChan)
+
+	// 等待所有工人完成工作
+	wg.Wait()
+}
+
+func initMeatsChan(meatChan chan *Meat) {
+	for _, m := range createMeats() {
+		meatChan <- m
+	}
+}
+
+// 創建肉品列表
+func createMeats() []*Meat {
+	var meats []*Meat
+
+	// 生成牛肉
+	for i := 0; i < BeefCount; i++ {
+		meats = append(meats, NewMeat(MeatTypeBeef))
+	}
+
+	// 生成豬肉
+	for i := 0; i < PorkCount; i++ {
+		meats = append(meats, NewMeat(MeatTypePork))
+	}
+
+	// 生成雞肉
+	for i := 0; i < ChickenCount; i++ {
+		meats = append(meats, NewMeat(MeatTypeChicken))
+	}
+
+	// 隨機排序
+	rand.Shuffle(len(meats), func(i, j int) {
+		meats[i], meats[j] = meats[j], meats[i]
+	})
+
+	return meats
 }
