@@ -66,7 +66,7 @@ func main() {
 	meatChan := make(chan *Meat, BeefCount+PorkCount+ChickenCount)
 	initMeatsChan(meatChan)
 
-	// 啟動工人 goroutine
+	// 啟動員工 goroutine
 	var wg sync.WaitGroup
 	for _, worker := range workers {
 		wg.Add(1)
@@ -81,7 +81,7 @@ func main() {
 	// 關閉 meatChan
 	close(meatChan)
 
-	// 等待所有工人完成工作
+	// 等待所有員工完成工作
 	wg.Wait()
 }
 
