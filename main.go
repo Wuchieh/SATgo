@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"math/rand"
 	"sync"
 )
@@ -39,17 +40,29 @@ import (
 const (
 	BeefCount    = 10
 	PorkCount    = 7
-	ChickenCount = 8
+	ChickenCount = 5
+)
+
+var (
+	// 員工姓名列表
+	workerName = []string{"A", "B", "C", "D", "E"}
 )
 
 func main() {
-	workerName := []string{"A", "B", "C", "D", "E"}
+	defer func() {
+		err := recover()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
+	// 初始化員工列表
 	var workers []*Worker
 	for _, s := range workerName {
 		workers = append(workers, NewWorker(s))
 	}
 
+	// 創建肉品流水線(channel)
 	meatChan := make(chan *Meat, BeefCount+PorkCount+ChickenCount)
 	initMeatsChan(meatChan)
 
